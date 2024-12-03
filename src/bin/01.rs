@@ -21,20 +21,33 @@ fn parse_string(input: &str, sorted: bool) -> (Vec<u32>, Vec<u32>) {
 pub fn part_one(input: &str) -> Option<u32> {
     let (left_list, right_list) = parse_string(input, true);
 
-    let mut total = 0;
-    for i in 0..left_list.len() {
-        total += left_list[i].abs_diff(right_list[i]);
-    }
-
-    Some(total)
+    Some(
+        left_list
+            .iter()
+            .enumerate()
+            .map(|(i, x)| x.abs_diff(right_list[i]))
+            .sum()
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let (left_list, right_list) = parse_string(input, false);
 
-    Some(right_list.iter().fold(0, |acc, &x| {
-        acc + x * (left_list.iter().filter(|&&y| x == y).count() as u32)
-    }))
+    Some(
+        left_list
+            .iter()
+            .map(
+                |&x|
+                    x *
+                    (
+                        right_list
+                            .iter()
+                            .filter(|&&y| x == y)
+                            .count() as u32
+                    )
+            )
+            .sum()
+    )
 }
 
 #[cfg(test)]

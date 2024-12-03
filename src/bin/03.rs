@@ -5,17 +5,19 @@ advent_of_code::solution!(3);
 
 static NUMBER_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap());
 
-fn parse_mul(input: &str) -> u32 {
-    let numbers = NUMBER_RE.find_iter(input);
-
-    numbers.fold(1, |acc, number| { acc * number.as_str().parse::<u32>().unwrap() })
-}
-
 pub fn part_one(input: &str) -> Option<u32> {
-    let mul_re = Regex::new(r"mul\(\d+,\d+\)").unwrap();
-    let hits = mul_re.find_iter(input);
+    let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
 
-    Some(hits.fold(0, |acc, hit| acc + parse_mul(hit.as_str())))
+    Some(
+        re
+            .captures_iter(input)
+            .map(|cap| {
+                let a = cap[1].parse::<u32>().unwrap();
+                let b = cap[2].parse::<u32>().unwrap();
+                a * b
+            })
+            .sum()
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -30,7 +32,10 @@ pub fn part_two(input: &str) -> Option<u32> {
         } else if hit.as_str() == "don't()" {
             enabled = false;
         } else if enabled {
-            total += parse_mul(hit.as_str());
+            let numbers = NUMBER_RE.find_iter(hit.as_str());
+            total += numbers.fold(1, |acc, number| {
+                acc * number.as_str().parse::<u32>().unwrap()
+            });
         }
     }
 

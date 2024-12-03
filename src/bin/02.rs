@@ -37,7 +37,8 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(
         levels
             .iter()
-            .fold(0, |acc, level| acc + (is_safe(level) as u32)),
+            .map(|level| is_safe(level) as u32)
+            .sum()
     )
 }
 
@@ -70,7 +71,8 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         levels
             .iter()
-            .fold(0, |acc, level| acc + (test_level(level) as u32)),
+            .map(|level| test_level(level) as u32)
+            .sum()
     )
 }
 
