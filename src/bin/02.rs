@@ -34,12 +34,7 @@ fn is_safe(level: &[i16]) -> bool {
 pub fn part_one(input: &str) -> Option<u32> {
     let levels = parse_string(input);
 
-    Some(
-        levels
-            .iter()
-            .map(|level| is_safe(level) as u32)
-            .sum()
-    )
+    Some(levels.iter().map(|level| is_safe(level) as u32).sum())
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -68,12 +63,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         false
     }
 
-    Some(
-        levels
-            .iter()
-            .map(|level| test_level(level) as u32)
-            .sum()
-    )
+    Some(levels.iter().map(|level| test_level(level) as u32).sum())
 }
 
 #[cfg(test)]

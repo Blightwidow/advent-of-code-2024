@@ -26,7 +26,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             .iter()
             .enumerate()
             .map(|(i, x)| x.abs_diff(right_list[i]))
-            .sum()
+            .sum(),
     )
 }
 
@@ -36,17 +36,8 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         left_list
             .iter()
-            .map(
-                |&x|
-                    x *
-                    (
-                        right_list
-                            .iter()
-                            .filter(|&&y| x == y)
-                            .count() as u32
-                    )
-            )
-            .sum()
+            .map(|&x| x * (right_list.iter().filter(|&&y| x == y).count() as u32))
+            .sum(),
     )
 }
 

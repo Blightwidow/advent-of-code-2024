@@ -9,14 +9,13 @@ pub fn part_one(input: &str) -> Option<u32> {
     let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
 
     Some(
-        re
-            .captures_iter(input)
+        re.captures_iter(input)
             .map(|cap| {
                 let a = cap[1].parse::<u32>().unwrap();
                 let b = cap[2].parse::<u32>().unwrap();
                 a * b
             })
-            .sum()
+            .sum(),
     )
 }
 
