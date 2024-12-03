@@ -1,17 +1,14 @@
 advent_of_code::solution!(2);
 
 fn parse_string(input: &str) -> Vec<Vec<i32>> {
-    let mut levels = Vec::new();
-
-    for line in input.lines() {
-        let mut level = Vec::new();
-        for number in line.split_whitespace() {
-            level.push(number.parse().unwrap());
-        }
-        levels.push(level);
-    }
-
-    levels
+    input
+        .lines()
+        .map(|line| {
+            line.split_whitespace()
+                .map(|number| number.parse().unwrap())
+                .collect()
+        })
+        .collect()
 }
 
 fn is_safe(level: &[i32]) -> bool {
@@ -37,7 +34,11 @@ fn is_safe(level: &[i32]) -> bool {
 pub fn part_one(input: &str) -> Option<u32> {
     let levels = parse_string(input);
 
-    Some(levels.iter().fold(0, |acc, level| acc + (is_safe(&level) as u32)))
+    Some(
+        levels
+            .iter()
+            .fold(0, |acc, level| acc + (is_safe(level) as u32)),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -66,7 +67,11 @@ pub fn part_two(input: &str) -> Option<u32> {
         false
     }
 
-    Some(levels.iter().fold(0, |acc, level| acc + (test_level(&level) as u32)))
+    Some(
+        levels
+            .iter()
+            .fold(0, |acc, level| acc + (test_level(level) as u32)),
+    )
 }
 
 #[cfg(test)]
