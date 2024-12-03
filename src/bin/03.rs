@@ -8,41 +8,29 @@ static NUMBER_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap()
 fn parse_mul(input: &str) -> u32 {
     let numbers = NUMBER_RE.find_iter(input);
 
-    numbers.fold(1, |acc, number| {
-        acc * number.as_str().parse::<u32>().unwrap()
-    })
+    numbers.fold(1, |acc, number| { acc * number.as_str().parse::<u32>().unwrap() })
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let mul_re = Regex::new(r"mul\(\d{1,3},\d{1,3}\)").unwrap();
+    let mul_re = Regex::new(r"mul\(\d+,\d+\)").unwrap();
     let hits = mul_re.find_iter(input);
 
     Some(hits.fold(0, |acc, hit| acc + parse_mul(hit.as_str())))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let mul_re = Regex::new(r"^mul\(\d{1,3},\d{1,3}\)").unwrap();
-    let do_re = Regex::new(r"^do[^n][^'][^t]").unwrap();
-    let dont_re = Regex::new(r"^don't").unwrap();
+    let re = Regex::new(r"mul\((\d+),(\d+)\)|do\(\)|don't\(\)").unwrap();
+
     let mut total = 0;
     let mut enabled = true;
 
-    for i in 0..input.len() {
-        if do_re.is_match(&input[i..]) {
+    for hit in re.find_iter(input) {
+        if hit.as_str() == "do()" {
             enabled = true;
-            continue; // Can only match one regex at each iteration
-        }
-
-        if dont_re.is_match(&input[i..]) {
+        } else if hit.as_str() == "don't()" {
             enabled = false;
-            continue; // Can only match one regex at each iteration
-        }
-
-        if enabled {
-            let mul_hit = mul_re.find(&input[i..]);
-            if let Some(hit) = mul_hit {
-                total += parse_mul(hit.as_str());
-            }
+        } else if enabled {
+            total += parse_mul(hit.as_str());
         }
     }
 
