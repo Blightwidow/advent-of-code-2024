@@ -1,6 +1,6 @@
 advent_of_code::solution!(2);
 
-fn parse_string(input: &str) -> Vec<Vec<i32>> {
+fn parse_string(input: &str) -> Vec<Vec<i16>> {
     input
         .lines()
         .map(|line| {
@@ -11,11 +11,11 @@ fn parse_string(input: &str) -> Vec<Vec<i32>> {
         .collect()
 }
 
-fn is_safe(level: &[i32]) -> bool {
-    let mut last_delta: Option<i32> = None;
+fn is_safe(level: &[i16]) -> bool {
+    let mut last_delta: Option<i16> = None;
 
     for i in 0..level.len() - 1 {
-        let delta: i32 = level[i] - level[i + 1];
+        let delta: i16 = level[i] - level[i + 1];
 
         if delta.abs() < 1 || delta.abs() > 3 {
             return false;
@@ -44,7 +44,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let levels = parse_string(input);
 
-    fn get_substitions(level: &[i32]) -> Vec<Vec<i32>> {
+    fn get_substitions(level: &[i16]) -> Vec<Vec<i16>> {
         let mut substitutions = Vec::new();
         substitutions.push(level.to_owned());
 
@@ -57,7 +57,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         substitutions
     }
 
-    fn test_level(level: &[i32]) -> bool {
+    fn test_level(level: &[i16]) -> bool {
         for substitution in get_substitions(level) {
             if is_safe(&substitution) {
                 return true;
