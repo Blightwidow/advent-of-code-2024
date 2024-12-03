@@ -1,6 +1,6 @@
 advent_of_code::solution!(1);
 
-fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
+fn parse_string(input: &str, sorted: bool) -> (Vec<u32>, Vec<u32>) {
     let mut left_list = Vec::new();
     let mut right_list = Vec::new();
 
@@ -10,14 +10,16 @@ fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
         right_list.push(parts.next().unwrap().parse::<u32>().unwrap());
     }
 
-    left_list.sort();
-    right_list.sort();
+    if sorted {
+        left_list.sort();
+        right_list.sort();
+    }
 
     (left_list, right_list)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let (left_list, right_list) = parse_string(input);
+    let (left_list, right_list) = parse_string(input, true);
 
     let mut total = 0;
     for i in 0..left_list.len() {
@@ -28,10 +30,10 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let (left_list, right_list) = parse_string(input);
+    let (left_list, right_list) = parse_string(input, false);
 
     Some(right_list.iter().fold(0, |acc, &x| {
-        acc + (x * left_list.iter().filter(|&&y| x == y).count() as u32)
+        acc + x * (left_list.iter().filter(|&&y| x == y).count() as u32)
     }))
 }
 
