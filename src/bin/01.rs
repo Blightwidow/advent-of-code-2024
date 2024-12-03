@@ -51,12 +51,12 @@ pub fn part_two(input: &str) -> Option<u32> {
         number * count
     }
 
-    let mut total = 0;
-    for i in left_list {
-        total += count(i, right_list.clone());
-    }
-
-    Some(total)
+    Some(
+        right_list
+            .clone()
+            .iter()
+            .fold(0, |acc, &x| acc + count(x, left_list.clone()))
+    )
 }
 
 #[cfg(test)]
