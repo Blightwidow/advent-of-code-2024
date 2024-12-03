@@ -12,50 +12,37 @@ fn parse_string(input: &str) -> Vec<Vec<i16>> {
 }
 
 fn is_safe(level: &[i16]) -> bool {
-    let mut last_delta: Option<i16> = None;
-
-    for i in 0..level.len() - 1 {
-        let delta: i16 = level[i] - level[i + 1];
-
-        if delta.abs() < 1 || delta.abs() > 3 {
-            return false;
-        }
-
-        if last_delta.is_some() && delta.signum() != last_delta.unwrap().signum() {
-            return false;
-        }
-
-        last_delta = Some(delta);
-    }
-
-    true
+    (level.windows(2).all(|window| window[0] < window[1]) ||
+        level.windows(2).all(|window| window[0] > window[1])) &&
+        level
+            .windows(2)
+            .all(|window| (window[0] - window[1]).abs() <= 3 && (window[0] - window[1]).abs() >= 1)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
     let levels = parse_string(input);
 
-    Some(levels.iter().map(|level| is_safe(level) as u32).sum())
+    Some(
+        levels
+            .iter()
+            .map(|level| is_safe(level) as u32)
+            .sum()
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let levels = parse_string(input);
 
-    fn get_substitions(level: &[i16]) -> Vec<Vec<i16>> {
-        let mut substitutions = Vec::new();
-        substitutions.push(level.to_owned());
+    fn test_level(level: &[i16]) -> bool {
+        if is_safe(level) {
+            return true;
+        }
 
         for i in 0..level.len() {
             let mut new_level = level.to_owned();
             new_level.remove(i);
-            substitutions.push(new_level);
-        }
 
-        substitutions
-    }
-
-    fn test_level(level: &[i16]) -> bool {
-        for substitution in get_substitions(level) {
-            if is_safe(&substitution) {
+            if is_safe(&new_level) {
                 return true;
             }
         }
@@ -63,7 +50,14 @@ pub fn part_two(input: &str) -> Option<u32> {
         false
     }
 
-    Some(levels.iter().map(|level| test_level(level) as u32).sum())
+    Some(
+        levels
+            .iter()
+            .map(|level| {
+                test_level(level) as u32
+            })
+            .sum()
+    )
 }
 
 #[cfg(test)]
