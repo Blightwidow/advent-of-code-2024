@@ -37,7 +37,7 @@ fn is_safe(level: &[i32]) -> bool {
 pub fn part_one(input: &str) -> Option<u32> {
     let levels = parse_string(input);
 
-    Some(levels.into_iter().fold(0, |acc, level| acc + (is_safe(&level) as u32)))
+    Some(levels.iter().fold(0, |acc, level| acc + (is_safe(&level) as u32)))
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
@@ -66,7 +66,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         false
     }
 
-    Some(levels.into_iter().fold(0, |acc, level| acc + (test_level(&level) as u32)))
+    Some(levels.iter().fold(0, |acc, level| acc + (test_level(&level) as u32)))
 }
 
 #[cfg(test)]
