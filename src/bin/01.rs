@@ -5,7 +5,7 @@ fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
     let mut right_list = Vec::new();
 
     for line in input.lines() {
-        let mut parts = line.split("   ");
+        let mut parts = line.split_whitespace();
         left_list.push(parts.next().unwrap().parse::<u32>().unwrap());
         right_list.push(parts.next().unwrap().parse::<u32>().unwrap());
     }
@@ -19,44 +19,20 @@ fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
 pub fn part_one(input: &str) -> Option<u32> {
     let (left_list, right_list) = parse_string(input);
 
-    // Computing functions declared here
-    fn total_difference(left_list: Vec<u32>, right_list: Vec<u32>) -> u32 {
-        let mut total = 0;
-        for i in 0..left_list.len() {
-            total += left_list[i].abs_diff(right_list[i]);
-        }
-
-        total
+    let mut total = 0;
+    for i in 0..left_list.len() {
+        total += left_list[i].abs_diff(right_list[i]);
     }
 
-    Some(total_difference(left_list, right_list))
+    Some(total)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let (left_list, right_list) = parse_string(input);
 
-    fn count(number: u32, list: Vec<u32>) -> u32 {
-        let mut count = 0;
-
-        for i in list {
-            if i == number {
-                count += 1;
-            }
-
-            if i > number {
-                break;
-            }
-        }
-
-        number * count
-    }
-
-    Some(
-        right_list
-            .clone()
-            .iter()
-            .fold(0, |acc, &x| acc + count(x, left_list.clone()))
-    )
+    Some(right_list.iter().fold(0, |acc, &x| {
+        acc + (x * left_list.iter().filter(|&&y| x == y).count() as u32)
+    }))
 }
 
 #[cfg(test)]
