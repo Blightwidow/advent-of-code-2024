@@ -1,77 +1,53 @@
-use regex::{ Regex, RegexBuilder };
+use advent_of_code::utils::grid::Grid;
+use advent_of_code::utils::point::*;
 
 advent_of_code::solution!(4);
 
-fn get_xmas_regexes(width: usize) -> Vec<Regex> {
-    let mut regexes = vec![Regex::new(r"^XMAS").unwrap(), Regex::new(r"^SAMX").unwrap()];
-
-    for i in [width - 1, width, width + 1].iter() {
-        regexes.push(
-            RegexBuilder::new(format!(r"^X.{{{}}}M.{{{}}}A.{{{}}}S", i, i, i).as_str())
-                .dot_matches_new_line(true)
-                .build()
-                .unwrap()
-        );
-        regexes.push(
-            RegexBuilder::new(format!(r"^S.{{{}}}A.{{{}}}M.{{{}}}X", i, i, i).as_str())
-                .dot_matches_new_line(true)
-                .build()
-                .unwrap()
-        );
-    }
-
-    regexes
-}
-
-fn get_mas_regexes(width: usize) -> Vec<Regex> {
-    let delta = width - 1;
-
-    vec![
-        RegexBuilder::new(format!(r"^M.M.{{{}}}A.{{{}}}S.S", delta, delta).as_str())
-            .dot_matches_new_line(true)
-            .build()
-            .unwrap(),
-        RegexBuilder::new(format!(r"^S.M.{{{}}}A.{{{}}}S.M", delta, delta).as_str())
-            .dot_matches_new_line(true)
-            .build()
-            .unwrap(),
-        RegexBuilder::new(format!(r"^S.S.{{{}}}A.{{{}}}M.M", delta, delta).as_str())
-            .dot_matches_new_line(true)
-            .build()
-            .unwrap(),
-        RegexBuilder::new(format!(r"^M.S.{{{}}}A.{{{}}}M.S", delta, delta).as_str())
-            .dot_matches_new_line(true)
-            .build()
-            .unwrap()
-    ]
-}
-
 pub fn part_one(input: &str) -> Option<u32> {
-    let mut total: u32 = 0;
-    let width = input.lines().next().unwrap().len();
-    let regexes = get_xmas_regexes(width);
+    let grid = Grid::parse(input);
+    let mut result = 0;
 
-    for i in 0..input.len() {
-        for regex in regexes.iter() {
-            total += regex.is_match(&input[i..]) as u32;
+    for x in 0..grid.width {
+        for y in 0..grid.height {
+            let point = Point::new(x, y);
+
+            if grid[point] == b'X' {
+                for step in DIAGONAL {
+                    result += (grid.contains(point + step * 3)
+                        && grid[point + step] == b'M'
+                        && grid[point + step * 2] == b'A'
+                        && grid[point + step * 3] == b'S') as u32;
+                }
+            }
         }
     }
 
-    Some(total)
+    Some(result)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let mut total: u32 = 0;
-    let width = input.lines().next().unwrap().len();
-    let regexes = get_mas_regexes(width);
+    let grid = Grid::parse(input);
+    let mut result = 0;
 
-    for i in 0..input.len() {
-        for regex in regexes.iter() {
-            total += regex.is_match(&input[i..]) as u32;
+    for x in 1..grid.width - 1 {
+        for y in 1..grid.height - 1 {
+            let point = Point::new(x, y);
+
+            if grid[point] == b'A' {
+                let ul = grid[point + Point::new(-1, -1)];
+                let ur = grid[point + Point::new(1, -1)];
+                let dl = grid[point + Point::new(-1, 1)];
+                let dr = grid[point + Point::new(1, 1)];
+
+                let horizontal = ul == ur && dl == dr && ul.abs_diff(dl) == 6;
+                let vertical = ul == dl && ur == dr && ul.abs_diff(ur) == 6;
+
+                result += (horizontal || vertical) as u32;
+            }
         }
     }
 
-    Some(total)
+    Some(result)
 }
 
 #[cfg(test)]
