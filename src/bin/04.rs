@@ -3,6 +3,8 @@ use advent_of_code::utils::point::*;
 
 advent_of_code::solution!(4);
 
+// You could probably optimize this with bitboard as it looks a lot like
+// line scan for chess pieces.
 pub fn part_one(input: &str) -> Option<u32> {
     let grid = Grid::parse(input);
     let mut result = 0;

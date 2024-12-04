@@ -1,51 +1,89 @@
 advent_of_code::solution!(2);
 
-fn parse_string(input: &str) -> Vec<Vec<i16>> {
-    input
-        .lines()
-        .map(|line| {
-            line.split_whitespace()
-                .map(|number| number.parse().unwrap())
-                .collect()
-        })
-        .collect()
-}
-
-fn is_safe(level: &[i16]) -> bool {
-    (level.windows(2).all(|window| window[0] < window[1])
-        || level.windows(2).all(|window| window[0] > window[1]))
-        && level
-            .windows(2)
-            .all(|window| (window[0] - window[1]).abs() <= 3 && (window[0] - window[1]).abs() >= 1)
-}
-
 pub fn part_one(input: &str) -> Option<u32> {
-    let levels = parse_string(input);
+    fn check(report: &[i32]) -> u32 {
+        let size = report.len();
+        let score: i32 = (1..size).map(|i| delta(report[i - 1], report[i])).sum();
 
-    Some(levels.iter().map(|level| is_safe(level) as u32).sum())
+        if score.abs() == (size - 1) as i32 {
+            return 1;
+        }
+
+        0
+    }
+
+    let mut total = 0;
+    let mut report = Vec::new();
+    for line in input.lines() {
+        report.extend(
+            line.split_whitespace()
+                .map(|number| number.parse::<i32>().unwrap()),
+        );
+
+        total += check(&report);
+
+        report.clear();
+    }
+
+    Some(total)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let levels = parse_string(input);
+    fn check(report: &[i32]) -> u32 {
+        let size = report.len();
+        let score: i32 = (1..size).map(|i| delta(report[i - 1], report[i])).sum();
 
-    fn test_level(level: &[i16]) -> bool {
-        if is_safe(level) {
-            return true;
+        if score.abs() == (size - 1) as i32 {
+            return 1;
         }
 
-        for i in 0..level.len() {
-            let mut new_level = level.to_owned();
-            new_level.remove(i);
+        for i in 0..size {
+            let mut score = score;
 
-            if is_safe(&new_level) {
-                return true;
+            // Snip out each level and replace with new level computed from neighbors to either side.
+            if i > 0 {
+                score -= delta(report[i - 1], report[i]);
+            }
+            if i < size - 1 {
+                score -= delta(report[i], report[i + 1]);
+            }
+            if i > 0 && i < size - 1 {
+                score += delta(report[i - 1], report[i + 1]);
+            }
+
+            if score.abs() == (size - 2) as i32 {
+                return 1;
             }
         }
 
-        false
+        0
     }
 
-    Some(levels.iter().map(|level| test_level(level) as u32).sum())
+    let mut total = 0;
+    let mut report = Vec::new();
+    for line in input.lines() {
+        report.extend(
+            line.split_whitespace()
+                .map(|number| number.parse::<i32>().unwrap()),
+        );
+
+        total += check(&report);
+
+        report.clear();
+    }
+
+    Some(total)
+}
+
+/// Convert each pair of levels to either +1 for increase, -1 for decrease or 0 for invalid range.
+fn delta(a: i32, b: i32) -> i32 {
+    let diff = b - a;
+
+    if diff.abs() <= 3 {
+        diff.signum()
+    } else {
+        0
+    }
 }
 
 #[cfg(test)]

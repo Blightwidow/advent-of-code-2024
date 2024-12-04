@@ -1,44 +1,78 @@
-use regex::Regex;
-use std::sync::LazyLock;
-
 advent_of_code::solution!(3);
 
-static NUMBER_RE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\d+").unwrap());
-
-pub fn part_one(input: &str) -> Option<u32> {
-    let re = Regex::new(r"mul\((\d+),(\d+)\)").unwrap();
-
-    Some(
-        re.captures_iter(input)
-            .map(|cap| {
-                let a = cap[1].parse::<u32>().unwrap();
-                let b = cap[2].parse::<u32>().unwrap();
-                a * b
-            })
-            .sum(),
-    )
-}
-
-pub fn part_two(input: &str) -> Option<u32> {
-    let re = Regex::new(r"mul\((\d+),(\d+)\)|do\(\)|don't\(\)").unwrap();
-
-    let mut total = 0;
+fn parse(input: &str) -> (u32, u32) {
+    let memory = input.as_bytes();
+    let mut index = 0;
     let mut enabled = true;
+    let mut part_one = 0;
+    let mut part_two = 0;
 
-    for hit in re.find_iter(input) {
-        if hit.as_str() == "do()" {
+    while index < memory.len() {
+        if memory[index] != b'm' && memory[index] != b'd' {
+            index += 1;
+            continue;
+        }
+
+        if memory[index..].starts_with(b"mul(") {
+            index += 4;
+        } else if memory[index..].starts_with(b"do()") {
+            index += 4;
             enabled = true;
-        } else if hit.as_str() == "don't()" {
+            continue;
+        } else if memory[index..].starts_with(b"don't()") {
+            index += 7;
             enabled = false;
-        } else if enabled {
-            let numbers = NUMBER_RE.find_iter(hit.as_str());
-            total += numbers.fold(1, |acc, number| {
-                acc * number.as_str().parse::<u32>().unwrap()
-            });
+            continue;
+        } else {
+            index += 1;
+            continue;
+        }
+
+        // First number
+        let mut first = 0;
+
+        while memory[index].is_ascii_digit() {
+            first = 10 * first + (memory[index] - b'0') as u32;
+            index += 1;
+        }
+
+        // First delimiter
+        if memory[index] != b',' {
+            continue;
+        }
+        index += 1;
+
+        // Second number
+        let mut second = 0;
+
+        while memory[index].is_ascii_digit() {
+            second = 10 * second + (memory[index] - b'0') as u32;
+            index += 1;
+        }
+
+        // Second delimiter
+        if memory[index] != b')' {
+            continue;
+        }
+        index += 1;
+
+        // Multiply
+        let product = first * second;
+        part_one += product;
+        if enabled {
+            part_two += product;
         }
     }
 
-    Some(total)
+    (part_one, part_two)
+}
+
+pub fn part_one(input: &str) -> Option<u32> {
+    Some(parse(input).0)
+}
+
+pub fn part_two(input: &str) -> Option<u32> {
+    Some(parse(input).1)
 }
 
 #[cfg(test)]

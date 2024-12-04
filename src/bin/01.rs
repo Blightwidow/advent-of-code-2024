@@ -11,8 +11,8 @@ fn parse_string(input: &str, sorted: bool) -> (Vec<u32>, Vec<u32>) {
     }
 
     if sorted {
-        left_list.sort();
-        right_list.sort();
+        left_list.sort_unstable();
+        right_list.sort_unstable();
     }
 
     (left_list, right_list)
@@ -24,8 +24,8 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(
         left_list
             .iter()
-            .enumerate()
-            .map(|(i, x)| x.abs_diff(right_list[i]))
+            .zip(right_list)
+            .map(|(x, y)| x.abs_diff(y))
             .sum(),
     )
 }
