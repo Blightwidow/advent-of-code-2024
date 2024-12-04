@@ -30,10 +30,6 @@ Solutions for [Advent of Code](https://adventofcode.com/) in [Rust](https://www.
 
 <!--- benchmarking table --->
 
-<!--- complexity table --->
-
-## <!--- complexity table --->
-
 ## Template
 
 This repo is based on a [the template](https://github.com/fspoettel/advent-of-code-rust). You can directly copy it from its repo and get coding as well.
