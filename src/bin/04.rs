@@ -36,7 +36,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             let point = Point::new(x, y);
 
             if grid[point] == b'X' {
-                for &step in [DOWN + RIGHT, DOWN + LEFT, UP + RIGHT, UP + LEFT].iter() {
+                for &step in [UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT].iter() {
                     result += (grid.contains(point + step * 3)
                         && grid[point + step] == b'M'
                         && grid[point + step * 2] == b'A'
