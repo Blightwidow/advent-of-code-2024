@@ -1,25 +1,21 @@
+use advent_of_code::utils::iter::*;
+use advent_of_code::utils::parse::*;
+
 advent_of_code::solution!(1);
 
-fn parse_string(input: &str, sorted: bool) -> (Vec<u32>, Vec<u32>) {
-    let mut left_list = Vec::new();
-    let mut right_list = Vec::new();
-
-    for line in input.lines() {
-        let mut parts = line.split_whitespace();
-        left_list.push(parts.next().unwrap().parse::<u32>().unwrap());
-        right_list.push(parts.next().unwrap().parse::<u32>().unwrap());
-    }
-
-    if sorted {
-        left_list.sort_unstable();
-        right_list.sort_unstable();
-    }
-
-    (left_list, right_list)
+fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
+    input
+        .iter_unsigned::<u32>()
+        .chunk::<2>()
+        .map(|[x, y]| (x, y))
+        .unzip()
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let (left_list, right_list) = parse_string(input, true);
+    let (mut left_list, mut right_list) = parse_string(input);
+
+    left_list.sort_unstable();
+    right_list.sort_unstable();
 
     Some(
         left_list
@@ -31,7 +27,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let (left_list, right_list) = parse_string(input, false);
+    let (left_list, right_list) = parse_string(input);
 
     Some(
         left_list

@@ -1,40 +1,36 @@
+use advent_of_code::utils::iter::*;
+use advent_of_code::utils::parse::*;
+
 use std::cmp::Ordering::{self, *};
 
 advent_of_code::solution!(5);
 
-fn parse(input: &str) -> ([[Ordering; 100]; 100], Vec<Vec<usize>>) {
+fn parse(input: &str) -> ([[Ordering; 100]; 100], &str) {
     let (couples, lists) = input.split_once("\n\n").unwrap();
     let mut order = [[Equal; 100]; 100];
 
-    for couple in couples.lines() {
-        let (i, j) = couple.split_once("|").unwrap();
-        let i: usize = i.parse().unwrap();
-        let j: usize = j.parse().unwrap();
-
+    let test = couples.iter_unsigned::<usize>().chunk::<2>();
+    for [i, j] in test {
         order[i][j] = Less;
         order[j][i] = Greater;
     }
 
-    let mut lines = Vec::new();
-
-    for line in lists.lines() {
-        let line = line.split(",").map(|x| x.parse().unwrap()).collect();
-        lines.push(line);
-    }
-
-    (order, lines)
+    (order, lists)
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let (order, lines) = parse(input);
+    let (order, lists) = parse(input);
 
     let mut result = 0;
+    let mut report = Vec::new();
 
-    for line in lines {
-        let middle = line.len() / 2;
+    for line in lists.lines() {
+        report.clear();
+        report.extend(line.iter_unsigned::<usize>());
+        let middle = report.len() / 2;
 
-        if line.is_sorted_by(|&from, &to| order[from][to] == Less) {
-            result += line[middle];
+        if report.is_sorted_by(|&from, &to| order[from][to] == Less) {
+            result += report[middle];
         }
     }
 
@@ -42,19 +38,19 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let (order, lines) = parse(input);
+    let (order, lists) = parse(input);
 
     let mut result = 0;
-    let mut update = Vec::new();
+    let mut report = Vec::new();
 
-    for line in lines {
-        let middle = line.len() / 2;
-        update.clear();
-        update.extend(line);
+    for line in lists.lines() {
+        report.clear();
+        report.extend(line.iter_unsigned::<usize>());
+        let middle = report.len() / 2;
 
-        if !update.is_sorted_by(|&from, &to| order[from][to] == Less) {
-            update.select_nth_unstable_by(middle, |&from, &to| order[from][to]);
-            result += update[middle];
+        if !report.is_sorted_by(|&from, &to| order[from][to] == Less) {
+            report.select_nth_unstable_by(middle, |&from, &to| order[from][to]);
+            result += report[middle];
         }
     }
 

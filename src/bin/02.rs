@@ -1,3 +1,4 @@
+use advent_of_code::utils::parse::*;
 advent_of_code::solution!(2);
 
 pub fn part_one(input: &str) -> Option<u32> {
@@ -15,10 +16,7 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut total = 0;
     let mut report = Vec::new();
     for line in input.lines() {
-        report.extend(
-            line.split_whitespace()
-                .map(|number| number.parse::<i32>().unwrap()),
-        );
+        report.extend(line.iter_signed::<i32>());
 
         total += check(&report);
 
@@ -62,10 +60,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     let mut total = 0;
     let mut report = Vec::new();
     for line in input.lines() {
-        report.extend(
-            line.split_whitespace()
-                .map(|number| number.parse::<i32>().unwrap()),
-        );
+        report.extend(line.iter_signed::<i32>());
 
         total += check(&report);
 
