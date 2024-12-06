@@ -1,3 +1,4 @@
+use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
 pub const ORIGIN: Point = Point::new(0, 0);
@@ -69,5 +70,13 @@ impl SubAssign for Point {
     fn sub_assign(&mut self, rhs: Self) {
         self.x -= rhs.x;
         self.y -= rhs.y;
+    }
+}
+
+impl Hash for Point {
+    #[inline]
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        state.write_u32(self.x as u32);
+        state.write_u32(self.y as u32);
     }
 }

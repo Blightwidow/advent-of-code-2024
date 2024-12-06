@@ -1,4 +1,5 @@
 use advent_of_code::utils::grid::Grid;
+use advent_of_code::utils::hash::{FastSet, FastSetBuilder};
 use advent_of_code::utils::point::*;
 
 use std::str;
@@ -6,7 +7,8 @@ use std::str;
 fn process_grid(grid: &mut Grid<u8>, ghost: bool) -> u32 {
     let mut current_point = grid.find(b'^').unwrap();
     let start = current_point;
-    let mut history: Vec<(Point, Point)> = Vec::new();
+    let mut history: FastSet<(Point, Point)> = FastSet::new();
+    let mut ghost_history: FastSet<(Point, Point)> = FastSet::new();
     let mut direction = UP;
     let mut result = 0;
 
@@ -31,42 +33,44 @@ fn process_grid(grid: &mut Grid<u8>, ghost: bool) -> u32 {
 
         // If the next point is a wall, turn right
         if grid[next_point] == b'#' {
-            history.push((direction, current_point));
+            if ghost {
+                history.insert((current_point, direction));
+            }
             direction = turn_right(direction);
             continue;
-        }
-
-        if ghost && next_point != start {
-            let mut ghost_history: Vec<(Point, Point)> = Vec::new();
-            ghost_history.push((direction, current_point));
+        } else if ghost && next_point != start && grid[next_point] != b'X' {
+            grid[next_point] = b'#';
+            ghost_history.clear();
+            ghost_history.insert((current_point, direction));
             let mut ghost_direction = turn_right(direction);
             let mut ghost_point = current_point;
 
-            while grid.contains(ghost_point) {
-                let next_point = ghost_point + ghost_direction;
+            loop {
+                let next_ghost_point = ghost_point + ghost_direction;
 
                 // If the next point is out of bounds, we are done
-                if !grid.contains(next_point) {
+                if !grid.contains(next_ghost_point) {
                     break;
                 }
 
                 // If the next point is a wall, turn right
-                if grid[next_point] == b'#' {
-                    if history.contains(&(ghost_direction, ghost_point))
-                        || ghost_history.contains(&(ghost_direction, ghost_point))
+                if grid[next_ghost_point] == b'#' {
+                    if ghost_history.contains(&(ghost_point, ghost_direction))
+                        || history.contains(&(ghost_point, ghost_direction))
                     {
-                        // We are looping
                         result += 1;
                         break;
                     }
 
-                    ghost_history.push((ghost_direction, ghost_point));
+                    ghost_history.insert((ghost_point, ghost_direction));
                     ghost_direction = turn_right(ghost_direction);
                     continue;
                 }
 
-                ghost_point = next_point;
+                ghost_point = next_ghost_point;
             }
+
+            grid[next_point] = b'.';
         }
 
         // Otherwise, move forward
