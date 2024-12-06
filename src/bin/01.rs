@@ -32,7 +32,7 @@ pub fn part_two(input: &str) -> Option<u32> {
     Some(
         left_list
             .iter()
-            .map(|&x| x * (right_list.iter().filter(|&&y| x == y).count() as u32))
+            .map(|&x| x * (right_list.iter().fold(0, |acc, &y| acc + (x == y) as u32)))
             .sum(),
     )
 }

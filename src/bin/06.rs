@@ -5,56 +5,36 @@ use advent_of_code::utils::point::*;
 use std::str;
 
 fn process_grid(grid: &mut Grid<u8>, ghost: bool) -> u32 {
-    let mut current_point = grid.find(b'^').unwrap();
-    let start = current_point;
+    let start = grid.find(b'^').unwrap();
+    let mut current_point = start;
     let mut history: FastSet<(Point, Point)> = FastSet::new();
     let mut ghost_history: FastSet<(Point, Point)> = FastSet::new();
     let mut direction = UP;
     let mut result = 0;
 
-    fn turn_right(direction: Point) -> Point {
-        match direction {
-            UP => RIGHT,
-            LEFT => UP,
-            DOWN => LEFT,
-            RIGHT => DOWN,
-            _ => panic!("Invalid direction"),
-        }
-    }
-
-    loop {
+    while grid.contains(current_point + direction) {
         grid[current_point] = b'X';
         let next_point = current_point + direction;
 
-        // If the next point is out of bounds, we are done
-        if !grid.contains(next_point) {
-            break;
-        }
-
-        // If the next point is a wall, turn right
         if grid[next_point] == b'#' {
             if ghost {
                 history.insert((current_point, direction));
             }
-            direction = turn_right(direction);
+            direction = direction.clockwise();
             continue;
-        } else if ghost && next_point != start && grid[next_point] != b'X' {
+        } else if ghost
+            && next_point != start
+            && grid[next_point] != b'X'
+        {
             grid[next_point] = b'#';
             ghost_history.clear();
             ghost_history.insert((current_point, direction));
-            let mut ghost_direction = turn_right(direction);
+            let mut ghost_direction = direction.clockwise();
             let mut ghost_point = current_point;
 
-            loop {
-                let next_ghost_point = ghost_point + ghost_direction;
-
-                // If the next point is out of bounds, we are done
-                if !grid.contains(next_ghost_point) {
-                    break;
-                }
-
-                // If the next point is a wall, turn right
-                if grid[next_ghost_point] == b'#' {
+            while grid.contains(ghost_point + ghost_direction) {
+                if grid[ghost_point + ghost_direction] == b'#' {
+                    // If we visited this point before then we are looping
                     if ghost_history.contains(&(ghost_point, ghost_direction))
                         || history.contains(&(ghost_point, ghost_direction))
                     {
@@ -63,18 +43,18 @@ fn process_grid(grid: &mut Grid<u8>, ghost: bool) -> u32 {
                     }
 
                     ghost_history.insert((ghost_point, ghost_direction));
-                    ghost_direction = turn_right(ghost_direction);
+                    ghost_direction = ghost_direction.clockwise();
                     continue;
                 }
 
-                ghost_point = next_ghost_point;
+                ghost_point += ghost_direction;
             }
 
             grid[next_point] = b'.';
         }
 
         // Otherwise, move forward
-        current_point = next_point;
+        current_point += direction;
     }
 
     result
@@ -86,7 +66,11 @@ pub fn part_one(input: &str) -> Option<u32> {
     let mut grid = Grid::parse(input);
     process_grid(&mut grid, false);
 
-    Some(grid.bytes.iter().filter(|&&b| b == b'X').count() as u32)
+    Some(
+        grid.bytes
+            .iter()
+            .fold(0, |acc, &b| acc + (b == b'X') as u32),
+    )
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
