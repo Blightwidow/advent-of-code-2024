@@ -24,26 +24,17 @@ pub fn part_one(input: &str) -> Option<u32> {
         result
     }
 
-    for i in 0..grid.width {
+    let size = grid.height;
+    for i in 0..size {
         result += scan_line(&grid, Point::new(i, 0), DOWN, grid.height);
-    }
-    for i in 0..grid.height {
         result += scan_line(&grid, Point::new(0, i), RIGHT, grid.width);
     }
 
-    for x in 0..grid.width {
-        for y in 0..grid.height {
-            let point = Point::new(x, y);
-
-            if grid[point] == b'X' {
-                for &step in [UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT].iter() {
-                    result += (grid.contains(point + step * 3)
-                        && grid[point + step] == b'M'
-                        && grid[point + step * 2] == b'A'
-                        && grid[point + step * 3] == b'S') as u32;
-                }
-            }
-        }
+    for i in 0..size - 3 {
+        result += scan_line(&grid, Point::new(i, 0), DOWN_RIGHT, size - i);
+        result += scan_line(&grid, Point::new(0, i + 1), DOWN_RIGHT, size - i - 1);
+        result += scan_line(&grid, Point::new(size - i - 1, 0), DOWN_LEFT, size - i);
+        result += scan_line(&grid, Point::new(size - 1, i + 1), DOWN_LEFT, size - i - 1);
     }
 
     Some(result)
@@ -58,13 +49,17 @@ pub fn part_two(input: &str) -> Option<u32> {
             let point = Point::new(x, y);
 
             if grid[point] == b'A' {
-                let ul = grid[point + Point::new(-1, -1)];
-                let ur = grid[point + Point::new(1, -1)];
-                let dl = grid[point + Point::new(-1, 1)];
-                let dr = grid[point + Point::new(1, 1)];
+                let upper_left = grid[point + Point::new(-1, -1)];
+                let upper_right = grid[point + Point::new(1, -1)];
+                let down_left = grid[point + Point::new(-1, 1)];
+                let down_right = grid[point + Point::new(1, 1)];
 
-                let horizontal = ul == ur && dl == dr && ul.abs_diff(dl) == 6;
-                let vertical = ul == dl && ur == dr && ul.abs_diff(ur) == 6;
+                let horizontal = upper_left == upper_right
+                    && down_left == down_right
+                    && upper_left.abs_diff(down_left) == 6;
+                let vertical = upper_left == down_left
+                    && upper_right == down_right
+                    && upper_left.abs_diff(upper_right) == 6;
 
                 result += (horizontal || vertical) as u32;
             }
