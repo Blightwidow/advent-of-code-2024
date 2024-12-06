@@ -3,80 +3,92 @@ use advent_of_code::utils::point::*;
 
 use std::str;
 
-const DIRECTIONS: [(u8, Point); 4] = [(b'>', RIGHT), (b'v', DOWN), (b'<', LEFT), (b'^', UP)];
-
-fn process_grid(grid: &mut Grid<u8>) -> bool {
+fn process_grid(grid: &mut Grid<u8>, ghost: bool) -> u32 {
     let mut current_point = grid.find(b'^').unwrap();
     let start = current_point;
-    let mut i = 0;
+    let mut history: Vec<(Point, Point)> = Vec::new();
+    let mut direction = UP;
+    let mut result = 0;
 
-    while grid.contains(current_point) && i < grid.width * grid.height {
-        for (i, &(guard_char, dir)) in DIRECTIONS.iter().enumerate() {
-            if grid[current_point] == guard_char {
-                let next_point = current_point + dir;
+    fn turn_right(direction: Point) -> Point {
+        match direction {
+            UP => RIGHT,
+            LEFT => UP,
+            DOWN => LEFT,
+            RIGHT => DOWN,
+            _ => panic!("Invalid direction"),
+        }
+    }
 
-                // We are in a loop
-                if next_point == start && guard_char == b'^' {
-                    return true;
-                }
+    loop {
+        grid[current_point] = b'X';
+        let next_point = current_point + direction;
+
+        // If the next point is out of bounds, we are done
+        if !grid.contains(next_point) {
+            break;
+        }
+
+        // If the next point is a wall, turn right
+        if grid[next_point] == b'#' {
+            history.push((direction, current_point));
+            direction = turn_right(direction);
+            continue;
+        }
+
+        if ghost && next_point != start {
+            let mut ghost_history: Vec<(Point, Point)> = Vec::new();
+            ghost_history.push((direction, current_point));
+            let mut ghost_direction = turn_right(direction);
+            let mut ghost_point = current_point;
+
+            while grid.contains(ghost_point) {
+                let next_point = ghost_point + ghost_direction;
 
                 // If the next point is out of bounds, we are done
                 if !grid.contains(next_point) {
-                    grid[current_point] = b'X';
-                    return false;
+                    break;
                 }
 
                 // If the next point is a wall, turn right
                 if grid[next_point] == b'#' {
-                    grid[current_point] = DIRECTIONS[(i + 1) % 4].0;
-                    break;
+                    if history.contains(&(ghost_direction, ghost_point))
+                        || ghost_history.contains(&(ghost_direction, ghost_point))
+                    {
+                        // We are looping
+                        result += 1;
+                        break;
+                    }
+
+                    ghost_history.push((ghost_direction, ghost_point));
+                    ghost_direction = turn_right(ghost_direction);
+                    continue;
                 }
 
-                // Otherwise, move forward
-                grid[current_point] = b'X';
-                grid[next_point] = guard_char;
-                current_point = next_point;
-                break;
+                ghost_point = next_point;
             }
         }
 
-        i += 1;
+        // Otherwise, move forward
+        current_point = next_point;
     }
 
-    if i >= grid.width * grid.height {
-        return true;
-    }
-
-    false
+    result
 }
 
 advent_of_code::solution!(6);
 
 pub fn part_one(input: &str) -> Option<u32> {
     let mut grid = Grid::parse(input);
-    process_grid(&mut grid);
+    process_grid(&mut grid, false);
 
     Some(grid.bytes.iter().filter(|&&b| b == b'X').count() as u32)
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
     let mut grid = Grid::parse(input);
-    let start = grid.find(b'^').unwrap();
-    process_grid(&mut grid);
-    grid[start] = b'^';
-    let mut result = 0;
 
-    for x in 0..grid.width {
-        for y in 0..grid.height {
-            if grid[Point::new(x, y)] == b'X' {
-                let mut next_grid = grid.clone();
-                next_grid[Point::new(x, y)] = b'#';
-                result += process_grid(&mut next_grid) as u32;
-            }
-        }
-    }
-
-    Some(result)
+    Some(process_grid(&mut grid, true))
 }
 
 #[cfg(test)]
