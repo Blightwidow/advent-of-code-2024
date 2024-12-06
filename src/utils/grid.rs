@@ -30,6 +30,17 @@ impl<T> Grid<T> {
     }
 }
 
+impl<T: Copy + PartialEq> Grid<T> {
+    pub fn find(&self, needle: T) -> Option<Point> {
+        let to_point = |index| {
+            let x = (index as i32) % self.width;
+            let y = (index as i32) / self.width;
+            Point::new(x, y)
+        };
+        self.bytes.iter().position(|&h| h == needle).map(to_point)
+    }
+}
+
 impl<T> Index<Point> for Grid<T> {
     type Output = T;
 

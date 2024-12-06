@@ -1,6 +1,6 @@
+use crate::utils::integer::*;
 use std::marker::PhantomData;
 use std::str::Bytes;
-use crate::utils::integer::*;
 
 pub trait ParseByte {
     fn to_decimal(self) -> u8;
