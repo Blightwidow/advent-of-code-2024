@@ -2,45 +2,55 @@ use advent_of_code::utils::parse::ParseOps;
 
 advent_of_code::solution!(7);
 
-fn check(result: u64, numbers: &[u64], bonus_op: bool) -> bool {
-    if numbers.len() == 1 {
-        return numbers[0] == result;
+fn check(target: u64, numbers: &[u64], index: usize, bonus_op: bool) -> bool {
+    if index == 1 {
+        return numbers[1] == target;
     }
 
-    let mut sum_numbers = vec![numbers[0] + numbers[1]];
-    sum_numbers.extend(numbers.iter().skip(2).collect::<Vec<_>>());
-
-    if check(result, &sum_numbers, bonus_op) {
-        return true;
-    }
+    let mut concatenated_target: u64 = 0;
+    let mut remainder: u64 = 0;
 
     if bonus_op {
-        let mut append_numbers = vec![
-            numbers[0] * 10_u64.pow(numbers[1].checked_ilog10().unwrap_or(0) + 1) + numbers[1],
-        ];
-        append_numbers.extend(numbers.iter().skip(2).collect::<Vec<_>>());
-
-        if check(result, &append_numbers, bonus_op) {
-            return true;
-        }
+        // You can get the multiple with ilog10 but its way more expensive
+        // As we know numbers in the input are < 10k we can use 3 ifs
+        // It results in a ± 30% speedup (from 194µs to 137µs)
+        // let multiplier = ;
+        concatenated_target = target / next_power_of_ten(numbers[index]);
+        remainder = target % next_power_of_ten(numbers[index]);
     }
 
-    let mut product_numbers = vec![numbers[0] * numbers[1]];
-    product_numbers.extend(numbers.iter().skip(2).collect::<Vec<_>>());
+    (bonus_op
+        && remainder == numbers[index]
+        && check(concatenated_target, numbers, index - 1, bonus_op))
+        || target % numbers[index] == 0
+            && check(target / numbers[index], numbers, index - 1, bonus_op)
+        || target > numbers[index] && check(target - numbers[index], numbers, index - 1, bonus_op)
+}
 
-    check(result, &product_numbers, bonus_op)
+#[inline]
+fn next_power_of_ten(n: u64) -> u64 {
+    if n < 10 {
+        10
+    } else if n < 100 {
+        100
+    } else {
+        1000
+    }
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
     let mut total = 0;
+    let mut equation = Vec::new();
 
     for line in input.lines() {
-        let mut numbers = line.iter_unsigned::<u64>();
-        let result = numbers.next().unwrap();
+        equation.extend(line.iter_unsigned::<u64>());
+        let result = equation[0];
 
-        if check(result, &numbers.collect::<Vec<_>>(), false) {
+        if check(result, &equation, equation.len() - 1, false) {
             total += result
         }
+
+        equation.clear();
     }
 
     Some(total)
@@ -48,14 +58,17 @@ pub fn part_one(input: &str) -> Option<u64> {
 
 pub fn part_two(input: &str) -> Option<u64> {
     let mut total = 0;
+    let mut equation = Vec::new();
 
     for line in input.lines() {
-        let mut numbers = line.iter_unsigned::<u64>();
-        let result = numbers.next().unwrap();
+        equation.extend(line.iter_unsigned::<u64>());
+        let result = equation[0];
 
-        if check(result, &numbers.collect::<Vec<_>>(), true) {
+        if check(result, &equation, equation.len() - 1, true) {
             total += result
         }
+
+        equation.clear();
     }
 
     Some(total)
