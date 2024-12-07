@@ -1,3 +1,8 @@
+//! # Day 1: Historian Hysteria
+//!
+//! Not much to say about this one. The only notable thing is that in part
+//! one you can use unstabled ordering to gain a tiny bit of time.
+
 use advent_of_code::utils::iter::*;
 use advent_of_code::utils::parse::*;
 

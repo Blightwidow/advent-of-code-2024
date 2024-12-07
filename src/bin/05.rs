@@ -1,3 +1,8 @@
+//! # Day 5: Print Queue
+//!
+//! Instead of computing the order manually, we can use a 2D array to store the order
+//! and then just check if the list is sorted by the order.
+
 use advent_of_code::utils::iter::*;
 use advent_of_code::utils::parse::*;
 
@@ -49,6 +54,7 @@ pub fn part_two(input: &str) -> Option<u32> {
         let middle = report.len() / 2;
 
         if !report.is_sorted_by(|&from, &to| order[from][to] == Less) {
+            // It is faster to get only the midle element than to fully sort the list
             report.select_nth_unstable_by(middle, |&from, &to| order[from][to]);
             result += report[middle];
         }

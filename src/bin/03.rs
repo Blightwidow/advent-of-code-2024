@@ -1,3 +1,14 @@
+//! # Day 3: Mull It Over
+//!
+//! We can compute both at the same time.
+//! We can just run along the input and parse the numbers.
+//! It is faster to just parse each digit and multiply them together.
+//! than to try to understand where the number stop and start in the string
+//! and convert that to a number.
+//!
+//! Part two is the exact same as part one, but we need to keep track of
+//! the state of the `enabled` flag.
+
 advent_of_code::solution!(3);
 
 fn parse(input: &str) -> (u32, u32) {

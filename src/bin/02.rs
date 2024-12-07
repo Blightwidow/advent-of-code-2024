@@ -1,3 +1,11 @@
+//! # Day 2: Red-Nosed Reports
+//!
+//! Instead of summing each report and checking if it is valid
+//! we can directly compute the deltas with their sign or 0 if invalid.
+//!
+//! So for example `9 7 6 2 1` would translate `-1 -1 0 -1` and we can check
+//! if the absolute sum of the deltas is equal to the size of the report - 1.
+
 use advent_of_code::utils::parse::*;
 advent_of_code::solution!(2);
 

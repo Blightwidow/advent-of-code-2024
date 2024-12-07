@@ -1,3 +1,17 @@
+//! # Day 4: Ceres Search
+//!
+//! In part one, we use a bitboard to store the last 4 bytes of the grid
+//! as the targets are 4 bytes long. We then scan the grid in all directions
+//! and check if the bytes match the targets.
+//! We do not need to scan all diagonals as we test for both the "XMAS" and "SAMX"
+//! at the same time.
+//!
+//! In part two, instead of scanning, we can simply check every "A" in the grid.
+//! Instead of checking if the bytes around it are "S" and "M" we can check if the
+//! bytes are the same either vertically or horizontally and the distance is 6 (as
+//! it can be the only combination with the same distance in the "X", "M", "A", "S"
+//! set).
+
 use advent_of_code::utils::grid::Grid;
 use advent_of_code::utils::point::*;
 

@@ -1,3 +1,13 @@
+//! # Day 6: Guard Gallivant
+//!
+//! In part two we only save the history when hiting a wall
+//! to avoid writing and reading every point in to the hashset
+//!
+//! TODO: It can be optimized further by pre-computing the next wall
+//! for each point and direction and check if we have visited that point before
+//! As each point calculation is independent we can parallelize this
+//! pretty easily.
+
 use advent_of_code::utils::grid::Grid;
 use advent_of_code::utils::hash::{FastSet, FastSetBuilder};
 use advent_of_code::utils::point::*;
@@ -24,7 +34,7 @@ pub fn part_one(input: &str) -> Option<u32> {
             result += 1;
             grid[next_point] = b'X';
         }
-        // Otherwise, move forward
+
         current_point += direction;
     }
 
@@ -77,7 +87,6 @@ pub fn part_two(input: &str) -> Option<u32> {
             grid[next_point] = b'.';
         }
 
-        // Otherwise, move forward
         current_point += direction;
     }
 
