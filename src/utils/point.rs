@@ -29,22 +29,18 @@ impl Point {
         Point { x, y }
     }
 
+    /// Return the clockwise rotation of the point. Intended for use with cardinal directions.
     #[inline]
     #[must_use]
     pub fn clockwise(self) -> Self {
         Point::new(-self.y, self.x)
     }
 
+    /// Return the counter-clockwise rotation of the point. Intended for use with cardinal directions.
     #[inline]
     #[must_use]
     pub fn counter_clockwise(self) -> Self {
         Point::new(self.y, -self.x)
-    }
-
-    #[inline]
-    #[must_use]
-    pub fn manhattan(self, other: Self) -> i32 {
-        (self.x - other.x).abs() + (self.y - other.y).abs()
     }
 }
 

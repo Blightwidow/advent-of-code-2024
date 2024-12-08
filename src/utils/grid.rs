@@ -24,6 +24,16 @@ impl Grid<u8> {
 }
 
 impl<T> Grid<T> {
+    /// Create a new grid with the same dimensions as the current grid, filled with the given `value`.
+    #[inline]
+    pub fn copy_with<U: Copy>(&self, value: U) -> Grid<U> {
+        Grid {
+            width: self.width,
+            height: self.height,
+            bytes: vec![value; (self.width * self.height) as usize],
+        }
+    }
+
     #[inline]
     pub fn contains(&self, point: Point) -> bool {
         point.x >= 0 && point.x < self.width && point.y >= 0 && point.y < self.height
@@ -31,6 +41,7 @@ impl<T> Grid<T> {
 }
 
 impl<T: Copy + PartialEq> Grid<T> {
+    /// Find the first point that satisfies the given `predicate`.
     pub fn find<F>(&self, predicate: F) -> Option<Point>
     where
         F: Fn(T) -> bool,
@@ -43,6 +54,7 @@ impl<T: Copy + PartialEq> Grid<T> {
         self.bytes.iter().position(|&h| predicate(h)).map(to_point)
     }
 
+    /// Find all points that satisfy the given `predicate`.
     pub fn find_all<F>(&self, predicate: F) -> Vec<Point>
     where
         F: Fn(T) -> bool,
