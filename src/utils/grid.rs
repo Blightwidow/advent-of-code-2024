@@ -31,13 +31,34 @@ impl<T> Grid<T> {
 }
 
 impl<T: Copy + PartialEq> Grid<T> {
-    pub fn find(&self, needle: T) -> Option<Point> {
+    pub fn find<F>(&self, predicate: F) -> Option<Point>
+    where
+        F: Fn(T) -> bool,
+    {
         let to_point = |index| {
             let x = (index as i32) % self.width;
             let y = (index as i32) / self.width;
             Point::new(x, y)
         };
-        self.bytes.iter().position(|&h| h == needle).map(to_point)
+        self.bytes.iter().position(|&h| predicate(h)).map(to_point)
+    }
+
+    pub fn find_all<F>(&self, predicate: F) -> Vec<Point>
+    where
+        F: Fn(T) -> bool,
+    {
+        let to_point = |index| {
+            let x = (index as i32) % self.width;
+            let y = (index as i32) / self.width;
+            Point::new(x, y)
+        };
+
+        self.bytes
+            .iter()
+            .enumerate()
+            .filter(|(_, &c)| predicate(c))
+            .map(|(i, _)| to_point(i))
+            .collect()
     }
 }
 

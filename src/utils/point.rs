@@ -1,3 +1,4 @@
+use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::ops::{Add, AddAssign, Mul, Sub, SubAssign};
 
@@ -15,7 +16,7 @@ pub const DIAGONAL: [Point; 8] = [
     UP, LEFT, RIGHT, DOWN, UP_LEFT, UP_RIGHT, DOWN_LEFT, DOWN_RIGHT,
 ];
 
-#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq)]
 pub struct Point {
     pub x: i32,
     pub y: i32,
@@ -38,6 +39,12 @@ impl Point {
     #[must_use]
     pub fn counter_clockwise(self) -> Self {
         Point::new(self.y, -self.x)
+    }
+
+    #[inline]
+    #[must_use]
+    pub fn manhattan(self, other: Self) -> i32 {
+        (self.x - other.x).abs() + (self.y - other.y).abs()
     }
 }
 
@@ -91,5 +98,11 @@ impl Hash for Point {
     fn hash<H: Hasher>(&self, state: &mut H) {
         state.write_u32(self.x as u32);
         state.write_u32(self.y as u32);
+    }
+}
+
+impl fmt::Debug for Point {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
     }
 }
