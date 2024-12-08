@@ -1,21 +1,36 @@
 //! # Day 8: Resonant Collinearity
+//!
+//! In order to avoid searching the string constantly for antenna of the same values,
+//! we can directly store the antennas in a hashmap and just iterates on groups of antennas.
 
 use advent_of_code::utils::{
     grid::Grid,
-    hash::{FastSet, FastSetBuilder},
+    hash::{FastMap, FastMapBuilder, FastSet, FastSetBuilder},
     point::Point,
 };
 
 advent_of_code::solution!(8);
 
-pub fn part_one(input: &str) -> Option<u32> {
+fn parse(input: &str) -> (Grid<u8>, FastMap<u8, Vec<Point>>) {
     let grid = Grid::parse(input);
-    let mut antinodes: FastSet<Point> = FastSet::new();
+    let mut antennas: FastMap<u8, Vec<Point>> = FastMap::new();
 
     for point in grid.find_all(|c| c != b'.') {
-        for other_antenna in grid.find_all(|c| c == grid[point]) {
-            if point != other_antenna {
-                for antinode in [other_antenna * 2 - point, point * 2 - other_antenna] {
+        antennas.entry(grid[point]).or_default().push(point);
+    }
+
+    (grid, antennas)
+}
+
+pub fn part_one(input: &str) -> Option<u32> {
+    let (grid, antennas) = parse(input);
+    let mut antinodes: FastSet<Point> = FastSet::new();
+
+    for points in antennas.values() {
+        for &first_antenna in points {
+            for &second_antenna in points {
+                if first_antenna != second_antenna {
+                    let antinode = second_antenna * 2 - first_antenna;
                     if grid.contains(antinode) {
                         antinodes.insert(antinode);
                     }
@@ -28,26 +43,20 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let grid = Grid::parse(input);
+    let (grid, antennas) = parse(input);
     let mut antinodes: FastSet<Point> = FastSet::new();
 
-    for point in grid.find_all(|c| c != b'.') {
-        for other_antenna in grid.find_all(|c| c == grid[point]) {
-            if point != other_antenna {
-                let mut delta = other_antenna - point;
-                let mut next_point = other_antenna;
+    for points in antennas.values() {
+        for &first_antenna in points {
+            for &second_antenna in points {
+                if first_antenna != second_antenna {
+                    let delta = second_antenna - first_antenna;
+                    let mut next_point = second_antenna;
 
-                while grid.contains(next_point) {
-                    antinodes.insert(next_point);
-                    next_point += delta;
-                }
-
-                delta = point - other_antenna;
-                next_point = point;
-
-                while grid.contains(next_point) {
-                    antinodes.insert(next_point);
-                    next_point += delta;
+                    while grid.contains(next_point) {
+                        antinodes.insert(next_point);
+                        next_point += delta;
+                    }
                 }
             }
         }
