@@ -18,9 +18,9 @@ advent_of_code::solution!(6);
 
 pub fn part_one(input: &str) -> Option<u32> {
     let mut grid = Grid::parse(input);
-    let mut current_point = grid.find(b'^').unwrap();
+    let mut current_point = grid.find(|c| c == b'^').unwrap();
     let mut direction = UP;
-    let mut result = 0;
+    let mut result = 1; // To account for the last point on exit
 
     while grid.contains(current_point + direction) {
         let next_point = current_point + direction;
@@ -44,7 +44,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 pub fn part_two(input: &str) -> Option<u32> {
     let mut grid = Grid::parse(input);
 
-    let start = grid.find(b'^').unwrap();
+    let start = grid.find(|c| c == b'^').unwrap();
     let mut current_point = start;
     let mut history: FastSet<(Point, Point)> = FastSet::new();
     let mut ghost_history: FastSet<(Point, Point)> = FastSet::new();
