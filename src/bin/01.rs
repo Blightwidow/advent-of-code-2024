@@ -8,7 +8,7 @@ use advent_of_code::utils::parse::*;
 
 advent_of_code::solution!(1);
 
-fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
+fn parse(input: &str) -> (Vec<u32>, Vec<u32>) {
     input
         .iter_unsigned::<u32>()
         .chunk::<2>()
@@ -17,7 +17,7 @@ fn parse_string(input: &str) -> (Vec<u32>, Vec<u32>) {
 }
 
 pub fn part_one(input: &str) -> Option<u32> {
-    let (mut left_list, mut right_list) = parse_string(input);
+    let (mut left_list, mut right_list) = parse(input);
 
     left_list.sort_unstable();
     right_list.sort_unstable();
@@ -32,7 +32,7 @@ pub fn part_one(input: &str) -> Option<u32> {
 }
 
 pub fn part_two(input: &str) -> Option<u32> {
-    let (left_list, right_list) = parse_string(input);
+    let (left_list, right_list) = parse(input);
 
     Some(
         left_list
