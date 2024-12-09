@@ -11,37 +11,35 @@
 advent_of_code::solution!(9);
 
 fn checksum(disk: Vec<i32>) -> u64 {
-    let mut total = 0;
-
-    for (i, &bit) in disk.iter().enumerate() {
+    disk.iter().enumerate().fold(0, |acc, (i, &bit)| {
         if bit != -1 {
-            total += i as u64 * bit as u64;
+            acc + i as u64 * bit as u64
+        } else {
+            acc
         }
-    }
-
-    total
+    })
 }
 
-fn parse_disk(input: &str) -> (Vec<i32>, Vec<(usize, u32)>, Vec<(usize, u32)>) {
+type Input = (Vec<i32>, Vec<(usize, u32)>, Vec<(usize, u32)>);
+
+fn parse(input: &str, truncated: bool) -> Input {
     let mut disk: Vec<i32> = Vec::new();
     let mut files: Vec<(usize, u32)> = Vec::new();
     let mut gaps: Vec<(usize, u32)> = Vec::new();
 
     for (i, char) in input.chars().enumerate() {
         if let Some(value) = char.to_digit(10) {
-            if i % 2 == 0 {
-                files.push((disk.len(), value));
-            } else {
-                gaps.push((disk.len(), value));
-            }
-
-            for _ in 0..value {
+            if !truncated {
                 if i % 2 == 0 {
-                    disk.push((i / 2) as i32);
+                    files.push((disk.len(), value));
                 } else {
-                    disk.push(-1);
+                    gaps.push((disk.len(), value));
                 }
             }
+
+            disk.extend(
+                std::iter::repeat(if i % 2 == 0 { i as i32 / 2 } else { -1 }).take(value as usize),
+            );
         } else {
             break;
         }
@@ -51,7 +49,7 @@ fn parse_disk(input: &str) -> (Vec<i32>, Vec<(usize, u32)>, Vec<(usize, u32)>) {
 }
 
 pub fn part_one(input: &str) -> Option<u64> {
-    let (mut disk, _, _) = parse_disk(input);
+    let (mut disk, _, _) = parse(input, true);
     let mut i = 0;
 
     while i < disk.len() {
@@ -69,22 +67,27 @@ pub fn part_one(input: &str) -> Option<u64> {
 }
 
 pub fn part_two(input: &str) -> Option<u64> {
-    let (mut disk, unfragged_files, mut gaps) = parse_disk(input);
+    let (mut disk, unfragged_files, mut gaps) = parse(input, false);
 
     for (id, &(file_start, filesize)) in unfragged_files.iter().enumerate().rev() {
         let matching_gap = gaps
             .iter_mut()
-            .take_while(|&&mut (start, _)| start < file_start)
-            .find(|&&mut (_, size)| size >= filesize);
+            .enumerate()
+            .take_while(|&(_, &mut (start, _))| start < file_start)
+            .find(|&(_, &mut (_, size))| size >= filesize);
 
-        if let Some(gap) = matching_gap {
+        if let Some((i, gap)) = matching_gap {
             let (gap_start, gap_size) = *gap;
             for k in 0..filesize {
                 disk[gap_start + k as usize] = id as i32;
                 disk[file_start + k as usize] = -1;
             }
 
-            *gap = (gap_start + filesize as usize, gap_size - filesize);
+            if gap_size - filesize == 0 {
+                gaps.remove(i);
+            } else {
+                *gap = (gap_start + filesize as usize, gap_size - filesize);
+            }
         }
     }
 
