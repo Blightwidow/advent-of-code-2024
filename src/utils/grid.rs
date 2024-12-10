@@ -1,7 +1,7 @@
 use crate::utils::point::Point;
-use std::ops::{Index, IndexMut};
+use std::{fmt, ops::{Index, IndexMut}};
 
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Eq, PartialEq)]
 pub struct Grid<T> {
     pub width: i32,
     pub height: i32,
@@ -87,5 +87,19 @@ impl<T> IndexMut<Point> for Grid<T> {
     #[inline]
     fn index_mut(&mut self, index: Point) -> &mut Self::Output {
         &mut self.bytes[(self.width * index.y + index.x) as usize]
+    }
+}
+
+impl fmt::Debug for Grid<u8> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            self.bytes
+                .chunks(self.width as usize)
+                .map(|row| std::str::from_utf8(row).unwrap())
+                .collect::<Vec<_>>()
+                .join("\n")
+        )
     }
 }
