@@ -1,5 +1,8 @@
 use crate::utils::point::Point;
-use std::{fmt, ops::{Index, IndexMut}};
+use std::{
+    fmt,
+    ops::{Index, IndexMut},
+};
 
 #[derive(Clone, Eq, PartialEq)]
 pub struct Grid<T> {
