@@ -1,50 +1,47 @@
 //! # Day 10: Hoof It
 
-use advent_of_code::utils::{grid::Grid, hash::*, point::*};
+use advent_of_code::utils::{grid::Grid, point::*};
 
 advent_of_code::solution!(10);
 
-fn check_ends(grid: &Grid<u8>, point: Point, ends: &mut FastSet<Point>) {
-    if grid[point] == b'9' {
-        ends.insert(point);
-        return;
-    }
+fn depth_first_search(
+    grid: &Grid<u8>,
+    point: Point,
+    history: &mut Grid<i32>,
+    start_id: i32,
+    distinct: bool,
+) -> u32 {
+    let mut total = 0;
 
-    for direction in ORTHOGONAL {
-        let next_point = point + direction;
-        if grid.contains(next_point) && grid[point] + 1 == grid[next_point] {
-            check_ends(grid, next_point, ends);
+    for next_point in ORTHOGONAL.map(|direction| point + direction) {
+        if grid.contains(next_point)
+            && grid[next_point] + 1 == grid[point]
+            && (distinct || history[next_point] != start_id)
+        {
+            history[next_point] = start_id;
+
+            if grid[next_point] == b'0' {
+                total += 1;
+            } else {
+                total += depth_first_search(grid, next_point, history, start_id, distinct);
+            }
         }
     }
-}
 
-fn check_paths(grid: &Grid<u8>, point: Point, solution: &mut Grid<u32>) {
-    if grid[point] == b'9' {
-        solution[point] += 1;
-        return;
-    }
-
-    for direction in ORTHOGONAL {
-        let next_point = point + direction;
-        if grid.contains(next_point) && grid[point] + 1 == grid[next_point] {
-            check_paths(grid, next_point, solution);
-        }
-    }
+    total
 }
 
 // Do not forget to check if the results can fit into u32
 pub fn part_one(input: &str) -> Option<u32> {
     let grid = Grid::parse(input);
-    let mut ends: FastSet<Point> = FastSet::new();
+    let mut history = grid.copy_with(-1);
     let mut total = 0;
 
     for y in 0..grid.height {
         for x in 0..grid.width {
             let point = Point::new(x, y);
-            if grid[point] == b'0' {
-                check_ends(&grid, point, &mut ends);
-                total += ends.len() as u32;
-                ends.clear();
+            if grid[point] == b'9' {
+                total += depth_first_search(&grid, point, &mut history, x * grid.width + y, false);
             }
         }
     }
@@ -54,18 +51,19 @@ pub fn part_one(input: &str) -> Option<u32> {
 
 pub fn part_two(input: &str) -> Option<u32> {
     let grid = Grid::parse(input);
-    let mut solution = grid.copy_with(0u32);
+    let mut history = grid.copy_with(-1);
+    let mut total = 0;
 
     for y in 0..grid.height {
         for x in 0..grid.width {
             let point = Point::new(x, y);
-            if grid[point] == b'0' {
-                check_paths(&grid, point, &mut solution);
+            if grid[point] == b'9' {
+                total += depth_first_search(&grid, point, &mut history, x * grid.width + y, true);
             }
         }
     }
 
-    Some(solution.bytes.iter().sum())
+    Some(total)
 }
 
 #[cfg(test)]
