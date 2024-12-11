@@ -23,9 +23,9 @@ fn checksum(disk: Vec<i32>) -> u64 {
 type Input = (Vec<i32>, Vec<(usize, u32)>, Vec<(usize, u32)>);
 
 fn parse(input: &str, truncated: bool) -> Input {
-    let mut disk: Vec<i32> = Vec::with_capacity(10000);
-    let mut files: Vec<(usize, u32)> = Vec::with_capacity(10000);
-    let mut gaps: Vec<(usize, u32)> = Vec::with_capacity(10000);
+    let mut disk: Vec<i32> = Vec::with_capacity(input.len() * 5);
+    let mut files: Vec<(usize, u32)> = Vec::with_capacity(input.len() / 2);
+    let mut gaps: Vec<(usize, u32)> = Vec::with_capacity(input.len() / 2);
 
     for (i, char) in input.chars().enumerate() {
         if let Some(value) = char.to_digit(10) {
