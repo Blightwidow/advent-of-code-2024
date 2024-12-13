@@ -1,5 +1,8 @@
 //! # Day 12: Garden Groups
 //!
+//! For part one, no need to compute regions as we can just iterate over the grid and compute the area and perimeter of each
+//! region directly.
+//!
 //! The part two uses a edge detection by looking at a window of 4 squares and checking if there is 3 or 1 square in the window.
 //! My implementation is pretty slow though.
 
@@ -7,9 +10,50 @@ use advent_of_code::utils::{grid::Grid, point::*};
 
 advent_of_code::solution!(12);
 
+pub fn part_one(input: &str) -> Option<u32> {
+    let grid = Grid::parse(input);
+    let mut total: u32 = 0;
+    let mut seen = vec![vec![false; grid.height as usize]; grid.width as usize];
+
+    for x in 0..grid.width {
+        for y in 0..grid.height {
+            if seen[y as usize][x as usize] {
+                continue;
+            }
+
+            let mut area = 0;
+            let mut perimeter = 0;
+            let mut queue = vec![Point::new(x, y)];
+
+            while let Some(point) = queue.pop() {
+                if seen[point.y as usize][point.x as usize] {
+                    continue;
+                }
+
+                area += 1;
+                let mut point_perimeter = 4;
+                seen[point.y as usize][point.x as usize] = true;
+
+                for next_point in ORTHOGONAL.map(|dir| point + dir) {
+                    if grid.contains(next_point) && grid[next_point] == grid[point] {
+                        point_perimeter -= 1;
+                        queue.push(next_point);
+                    }
+                }
+
+                perimeter += point_perimeter;
+            }
+
+            total += area * perimeter;
+        }
+    }
+
+    Some(total)
+}
+
 fn get_regions(grid: &Grid<u8>) -> Vec<Vec<Point>> {
     let mut seen = vec![vec![false; grid.height as usize]; grid.width as usize];
-    let mut regions = Vec::new();
+    let mut regions = Vec::with_capacity(100);
 
     for x in 0..grid.width {
         for y in 0..grid.height {
@@ -40,32 +84,6 @@ fn get_regions(grid: &Grid<u8>) -> Vec<Vec<Point>> {
     }
 
     regions
-}
-
-pub fn part_one(input: &str) -> Option<u32> {
-    let grid = Grid::parse(input);
-    let regions = get_regions(&grid);
-    let mut total: u32 = 0;
-
-    for region in regions {
-        let mut perimeter = 0;
-
-        for &point in region.iter() {
-            let mut point_perimeter = 4;
-
-            for next_point in ORTHOGONAL.map(|dir| point + dir) {
-                if grid.contains(next_point) && grid[next_point] == grid[point] {
-                    point_perimeter -= 1;
-                }
-            }
-
-            perimeter += point_perimeter;
-        }
-
-        total += region.len() as u32 * perimeter;
-    }
-
-    Some(total)
 }
 
 fn get_regions_boundaries(region: &[Point]) -> (i32, i32, i32, i32) {

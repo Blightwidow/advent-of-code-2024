@@ -28,7 +28,9 @@ fn parse_input(input: &str) -> Vec<Machine> {
 }
 
 fn solve(machine: &Machine, max_presses: f64, offset: f64) -> u64 {
-    let [a, j, b, k, mut c, mut l] = machine[..] else { panic!("Invalid input") };
+    let [a, j, b, k, mut c, mut l] = machine[..] else {
+        panic!("Invalid input")
+    };
 
     // For part two
     c += offset;
