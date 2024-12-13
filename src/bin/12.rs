@@ -1,3 +1,8 @@
+//! # Day 12: Garden Groups
+//!
+//! The part two uses a edge detection by looking at a window of 4 squares and checking if there is 3 or 1 square in the window.
+//! My implementation is pretty slow though.
+
 use advent_of_code::utils::{grid::Grid, point::*};
 
 advent_of_code::solution!(12);
@@ -96,11 +101,6 @@ pub fn part_two(input: &str) -> Option<u32> {
 
                 if values.len() == 3 || values.len() == 1 {
                     angles += 1;
-                } else if values.len() == 2
-                    && values[0].x != values[1].x
-                    && values[0].y != values[1].y
-                {
-                    angles += 2;
                 }
             }
         }

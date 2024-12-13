@@ -1,3 +1,7 @@
+//! # Day 13: Claw Contraption
+//!
+//! Kinda lazy today. You can probably do better than me.
+
 use regex::Regex;
 
 advent_of_code::solution!(13);
