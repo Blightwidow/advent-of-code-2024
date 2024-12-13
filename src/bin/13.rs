@@ -1,40 +1,34 @@
 //! # Day 13: Claw Contraption
 //!
-//! Kinda lazy today. You can probably do better than me.
+//! Nothing peculiar here. Just a simple system of linear equations.
+//! The types are chosen to be `f64` to avoid overflow in part two.
 
-use regex::Regex;
+use advent_of_code::utils::parse::ParseOps;
 
 advent_of_code::solution!(13);
 
 const A_COST: u64 = 3;
 const B_COST: u64 = 1;
 
-type Button = (f64, f64);
-type Machine = (Button, Button, Button);
+type Machine = Vec<f64>;
 
 fn parse_input(input: &str) -> Vec<Machine> {
     let mut machines: Vec<Machine> = Vec::new();
-    let number_regex: Regex = Regex::new(r"(\d+)[^\d]+(\d+)").unwrap();
 
     for block in input.split("\n\n") {
-        let mut buttons: Vec<Button> = Vec::new();
-        for line in block.lines() {
-            let captures = number_regex.captures(line).unwrap();
-            buttons.push((
-                captures[1].parse::<f64>().unwrap(),
-                captures[2].parse::<f64>().unwrap(),
-            ));
-        }
-        machines.push((buttons[0], buttons[1], buttons[2]));
+        machines.push(
+            block
+                .iter_unsigned::<u32>()
+                .map(|x| x as f64)
+                .collect::<Vec<_>>(),
+        );
     }
 
     machines
 }
 
-fn solve(machine: Machine, max_presses: f64, offset: f64) -> u64 {
-    let (a, j) = machine.0;
-    let (b, k) = machine.1;
-    let (mut c, mut l) = machine.2;
+fn solve(machine: &Machine, max_presses: f64, offset: f64) -> u64 {
+    let [a, j, b, k, mut c, mut l] = machine[..] else { panic!("Invalid input") };
 
     // For part two
     c += offset;
@@ -55,7 +49,7 @@ pub fn part_one(input: &str) -> Option<u64> {
     Some(
         parse_input(input)
             .iter()
-            .map(|machine| solve(*machine, 100.0, 0.0))
+            .map(|machine| solve(machine, 100.0, 0.0))
             .sum(),
     )
 }
@@ -64,7 +58,7 @@ pub fn part_two(input: &str) -> Option<u64> {
     Some(
         parse_input(input)
             .iter()
-            .map(|machine| solve(*machine, f64::MAX, 10000000000000.0))
+            .map(|machine| solve(machine, f64::MAX, 10000000000000.0))
             .sum(),
     )
 }
