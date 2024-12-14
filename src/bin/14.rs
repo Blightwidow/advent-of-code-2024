@@ -3,8 +3,12 @@
 //! Part can be directly calculated by using the rem euclid function to simulate the
 //! movement of the robots. You can directly calculate the position after 100 seconds.
 //!
-//! Once you have the iteration function, you can solve part 2 by looking at iterations
-//! with a large number of robots in the same x and y coordinates.
+//! For part 2, we can calculate the count of robots on each row and column at each time step.
+//! As the positions on each axis loops every `grid_width` and `grid_height` respectively, we just
+//! need the first `grid_width` and `grid_height` times steps to every possible positions.
+//! Then we can find the first time step where there are more than 20 robots on a row and column.
+//!
+//! Some people solved it by checking the robots do not stack, but my input failed that approach.
 
 use advent_of_code::utils::{iter::ChunkOps, parse::*};
 
@@ -47,43 +51,32 @@ pub fn part_one(input: &str) -> Option<u32> {
     Some(quadrants.iter().product())
 }
 
-pub fn part_two(input: &str) -> Option<u32> {
+pub fn part_two(input: &str) -> Option<usize> {
     let robots = parse(input);
-    let grid_width = robots.iter().map(|&r| r[0]).max().unwrap() + 1;
-    let grid_height = robots.iter().map(|&r| r[1]).max().unwrap() + 1;
+    let grid_width = robots.iter().map(|&r| r[0]).max().unwrap() as usize + 1;
+    let grid_height = robots.iter().map(|&r| r[1]).max().unwrap() as usize + 1;
+    let mut xs = vec![vec![0; grid_width]; grid_width];
+    let mut ys = vec![vec![0; grid_height]; grid_height];
 
-    for i in 1..10_000 {
-        let current_robots: Vec<Robot> = robots
-            .iter()
-            .map(|[x, y, dx, dy]| {
-                let x = (x + i as i32 * dx).rem_euclid(101);
-                let y = (y + i as i32 * dy).rem_euclid(103);
-                [x, y, *dx, *dy]
-            })
-            .collect();
+    for (time, row) in xs.iter_mut().enumerate() {
+        for [x, _, dx, _] in robots.iter() {
+            let next_x = (x + dx * time as i32).rem_euclid(grid_width as i32) as usize;
+            row[next_x] += 1;
+        }
+    }
 
-        let count_x =
-            current_robots
-                .iter()
-                .fold(vec![0; grid_width as usize], |mut acc, &robot| {
-                    acc[robot[0] as usize] += 1;
-                    acc
-                });
-        let max_x = *count_x.iter().max().unwrap();
+    for (time, row) in ys.iter_mut().enumerate() {
+        for [_, y, _, dy] in robots.iter() {
+            let next_y = (y + dy * time as i32).rem_euclid(grid_height as i32) as usize;
+            row[next_y] += 1;
+        }
+    }
 
-        if max_x > 20 {
-            let count_y =
-                current_robots
-                    .iter()
-                    .fold(vec![0; grid_height as usize], |mut acc, &robot| {
-                        acc[robot[1] as usize] += 1;
-                        acc
-                    });
-            let max_y = *count_y.iter().max().unwrap();
-
-            if max_y > 20 {
-                return Some(i);
-            }
+    for time in 1..grid_height * grid_width {
+        if xs[time % grid_width].iter().any(|&row| row > 20)
+            && ys[time % grid_height].iter().any(|&row| row > 20)
+        {
+            return Some(time);
         }
     }
 
