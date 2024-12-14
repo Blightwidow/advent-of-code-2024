@@ -43,6 +43,16 @@ impl<T> Grid<T> {
     }
 }
 
+impl<T: Copy> Grid<T> {
+    pub fn new(width: i32, height: i32, value: T) -> Grid<T> {
+        Grid {
+            width,
+            height,
+            bytes: vec![value; (width * height) as usize],
+        }
+    }
+}
+
 impl<T: Copy + PartialEq> Grid<T> {
     /// Find the first point that satisfies the given `predicate`.
     pub fn find<F>(&self, predicate: F) -> Option<Point>
