@@ -55,32 +55,48 @@ pub fn part_two(input: &str) -> Option<usize> {
     let robots = parse(input);
     let grid_width = robots.iter().map(|&r| r[0]).max().unwrap() as usize + 1;
     let grid_height = robots.iter().map(|&r| r[1]).max().unwrap() as usize + 1;
-    let mut xs = vec![vec![0; grid_width]; grid_width];
-    let mut ys = vec![vec![0; grid_height]; grid_height];
+    let mut modulo_x = 0;
+    let mut modulo_y = 0;
 
-    for (time, row) in xs.iter_mut().enumerate() {
-        for [x, _, dx, _] in robots.iter() {
-            let next_x = (x + dx * time as i32).rem_euclid(grid_width as i32) as usize;
-            row[next_x] += 1;
-        }
-    }
-
-    for (time, row) in ys.iter_mut().enumerate() {
-        for [_, y, _, dy] in robots.iter() {
-            let next_y = (y + dy * time as i32).rem_euclid(grid_height as i32) as usize;
-            row[next_y] += 1;
-        }
-    }
-
-    for time in 1..grid_height * grid_width {
-        if xs[time % grid_width].iter().any(|&row| row > 20)
-            && ys[time % grid_height].iter().any(|&row| row > 20)
+    for time in 0..grid_width {
+        if robots
+            .iter()
+            .map(|[x, _, dx, _]| (x + dx * time as i32).rem_euclid(grid_width as i32) as usize)
+            .fold(vec![0; grid_width], |mut acc, x| {
+                acc[x] += 1;
+                acc
+            })
+            .iter()
+            .any(|&count| count >= 30)
         {
-            return Some(time);
+            modulo_x = time;
+            break;
         }
     }
 
-    unreachable!()
+    for time in 0..grid_height {
+        if robots
+            .iter()
+            .map(|[_, y, _, dy]| (y + dy * time as i32).rem_euclid(grid_height as i32) as usize)
+            .fold(vec![0; grid_height], |mut acc, y| {
+                acc[y] += 1;
+                acc
+            })
+            .iter()
+            .any(|&count| count >= 30)
+        {
+            modulo_y = time;
+            break;
+        }
+    }
+
+    (1..grid_height)
+        .find(|i| {
+            let time = i * grid_width + modulo_x;
+
+            time % grid_height == modulo_y
+        })
+        .map(|i| i * grid_width + modulo_x)
 }
 
 #[cfg(test)]
